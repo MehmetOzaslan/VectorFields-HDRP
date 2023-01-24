@@ -7,6 +7,17 @@ using UnityEngine;
 
 public static class Vector3Utils
 {
+    public static Vector3 oct1 = new Vector3(1, 1, 1);
+    public static Vector3 oct2 = new Vector3(-1, 1, 1);
+    public static Vector3 oct3 = new Vector3(1, -1, 1);
+    public static Vector3 oct4 = new Vector3(1, 1, -1);
+    public static Vector3 oct5 = new Vector3(-1, -1, 1);
+    public static Vector3 oct6 = new Vector3(-1, 1, -1);
+    public static Vector3 oct7 = new Vector3(1, -1, -1);
+    public static Vector3 oct8 = new Vector3(-1, -1, -1);
+
+
+
 
     public static Vector3Int RoundedPoint(Vector3 point)
     {
@@ -25,7 +36,6 @@ public static class Vector3Utils
         float z = Mathf.Clamp(input.z, min.z, max.z);
 
         return new Vector3(x, y, z);
-
     }
 
     public static Vector3 Reflect(Vector3 point, Vector3 relativeTo, Vector3 sign)
