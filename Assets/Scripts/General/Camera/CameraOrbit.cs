@@ -85,6 +85,15 @@ public class CameraOrbit : MonoBehaviour
                 LocalRotation.y = Mathf.Clamp(LocalRotation.y, -90, 90);
             }
 
+            //Rotation of the camera based on keyboard input.
+
+            if(Input.GetAxis("Horizontal") != 0 || Input.GetAxis("Vertical") != 0)
+            {
+                LocalRotation.x += Input.GetAxis("Horizontal") * MouseSensitivity;
+                LocalRotation.y += Input.GetAxis("Vertical") * MouseSensitivity;
+
+                LocalRotation.y = Mathf.Clamp(LocalRotation.y, -90, 90);
+            }
 
         }
 
