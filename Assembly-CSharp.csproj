@@ -99,7 +99,6 @@
     <Compile Include="Assets\Scripts\General\Player\CenterPlayerFromCharges.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMPro_InstructionOverlay.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_ExampleScript_01.cs" />
-    <Compile Include="Assets\Scripts\VectorFieldTutorialVideoCode.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextConsoleSimulator.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\ObjectSpin.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_TextInfoDebugTool.cs" />
@@ -110,6 +109,7 @@
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\WarpTextExample.cs" />
     <Compile Include="Assets\Scripts\General\Player\Charger.cs" />
     <Compile Include="Assets\Scripts\Util\Texture3DPreviewInInspector.cs" />
+    <Compile Include="Assets\Scripts\Util\OctreeConstructor.cs" />
     <Compile Include="Assets\Scripts\Util\ExprUtils.cs" />
     <Compile Include="Assets\Scripts\UI\MinMaxDisplay.cs" />
     <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TMP_DigitValidator.cs" />

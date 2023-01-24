@@ -2,9 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+/*
+ * This function that takes some parameters x y z and maps to some x y z.
+ * Unfortunately this is tightly coupled to the UI and may be difficult to remove from mono
+ */
+
 public class Function3D : MonoBehaviour
 {
-
     //Should any error occur during parsing., it will be accessible from here.
     public string Error = "";
     public string[] parameters;
@@ -17,6 +22,12 @@ public class Function3D : MonoBehaviour
     public ExpressionDelegate yExpr;
     public ExpressionDelegate zExpr;
 
+    public Function3D()
+    {
+
+    }
+
+    
     public void Awake()
     {
         parameters = new string[] {"x", "y", "z"};

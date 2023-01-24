@@ -1,9 +1,7 @@
 ﻿using B83.ExpressionParser;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class ExprUtils : MonoBehaviour
+public class ExprUtils
 {
     public static float numDerivative(float t, ExpressionDelegate expressionDelegate) //Calculate the numerical derivative with 0.001.
     {
