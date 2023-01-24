@@ -33,7 +33,6 @@ public class VectorFieldVisualizationController : MonoBehaviour
         }
     }
 
-
     void SetForces()
     {
         vfx.SetTexture("Forces", vectorField.forceMap);

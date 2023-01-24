@@ -14,7 +14,6 @@ public class VectorField : MonoBehaviour
     //Also contains inner functions which can be manipulated.
     public Function3D function3D;
 
-
     //Used to store Vector Field.
     public Texture3D texture3D;
     public Texture2D positionMap;
@@ -51,6 +50,8 @@ public class VectorField : MonoBehaviour
     }
     
 
+
+
     void UpdatePositions()
     {
         //List of positions to calculate force at
@@ -58,7 +59,6 @@ public class VectorField : MonoBehaviour
 
         //Generating and adding points to positions
         positions = PositionGenerator.BoundsIntegerPositions(bounds);
-
         positionMap = TextureUtils.Vector3List2Texture2D(positions);
     }
 
