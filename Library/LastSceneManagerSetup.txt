@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/Scenes/ElectricFieldScene.unity
+- path: Assets/Scenes/vectorFieldParticles.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0

@@ -20,14 +20,6 @@ public class VectorFieldVisualizationController : MonoBehaviour
         StartCoroutine(DelayedUpdate());
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-
-
-    }
-
 
 
     IEnumerator DelayedUpdate()
