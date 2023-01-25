@@ -69,22 +69,27 @@ public class Octree : MonoBehaviour
     {
         if (obj.GetComponent<Collider>())
         {
-            Bounds b = obj.GetComponent<Collider>().bounds;
-            Insert(b, (b, node) => { return node.bounds.Intersects(b);});
+
+            Insert<Bounds>(new Bounds(), (node, bounds) => { return BoundsIntersecting(node.bounds); });
         }
     }
 
+    bool BoundsIntersecting(Bounds bounds)
+    {
+        return Physics.CheckBox(bounds.center, bounds.size/2, Quaternion.identity);
+    }
+
     public void InsertPoint(Vector3 point) {
-        Insert(point, (point, node) => { return node.bounds.Contains(point); });
+        Insert(point, (node, point) => { return node.bounds.Contains(point); });
     }
 
     //Insert a point.
-    public void Insert<T>(T inserted, Func<T, OctreeNode, bool> contains)
+    public void Insert<T>(T inserted, Func<OctreeNode, T, bool> contains)
     {
         h_Insert(parent, inserted, contains, MaxDepth);
     }
 
-    private void h_Insert<T>(OctreeNode parent, T inserted, Func<T, OctreeNode, bool> contains, int depth)
+    private void h_Insert<T>(OctreeNode parent, T inserted, Func<OctreeNode, T, bool> contains, int depth)
     {
         Debug.Log(depth);
         if (depth == 0)
@@ -101,7 +106,7 @@ public class Octree : MonoBehaviour
         //Optimize potentially
         foreach (var child in parent.children)
         {
-            if (contains(inserted, child))
+            if (contains(child, inserted))
             {
                 //Recurse.
                 h_Insert(child, inserted, contains ,depth-1);
