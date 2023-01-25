@@ -7,13 +7,13 @@ using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.VFX;
 
 
 //For writing to structured buffer
 //NOTES:
 //LET 0 BE A NULL POINTER.
+
 
 [VFXType(VFXTypeAttribute.Usage.GraphicsBuffer)]
 public struct OctreeNodeStruct
@@ -28,19 +28,21 @@ public struct OctreeNodeStruct
     public int o6;
     public int o7;
     public int o8;
-    //public Bounds bounds;
     public Vector3 data1;
     public Vector3 data2;
-
+    public int[] GetOctants()
+    {
+        return new int[] { o1, o2, o3, o4, o5, o6, o7, o8 };
+    }
     public OctreeNodeStruct(OctreeNode octreeNode) : this()
     {
-        
         this.id = octreeNode.id;
-
-        if(octreeNode.children != null)
+        this.data1 = octreeNode.bounds.center;
+        this.data2= octreeNode.bounds.extents;
+        if (octreeNode.children != null)
         {
             o1 = octreeNode.children[0].id;
-            o2 = octreeNode.children[1].id;
+            o2 = octreeNode.children[1].id; 
             o3 = octreeNode.children[2].id;
             o4 = octreeNode.children[3].id;
             o5 = octreeNode.children[4].id;
@@ -93,8 +95,11 @@ public class OctreeNode
 [ExecuteInEditMode]
 public class Octree : MonoBehaviour
 {
-    int numNodes = 0;
-    public float maxSize = 0.3f;
+    uint numNodes = 0;
+
+    [SerializeField]
+    [Range(0.1f, 1f)]
+    public float minSize = 0.3f;
     public OctreeNode parent;
     public List<GameObject> surrounding;
 
@@ -136,30 +141,74 @@ public class Octree : MonoBehaviour
             numNodes++;
 
             //Base case.
-            if(currentNode.bounds.size.sqrMagnitude < maxSize) 
+            if(currentNode.bounds.size.sqrMagnitude < minSize) 
             {
                 continue;
             }
             else if(Physics.CheckBox(currentNode.bounds.center, currentNode.bounds.size / 2, Quaternion.identity))
             {
+                //Construct the children.
                 currentNode.ConstructChildren();
-                foreach (var item in currentNode.children)
+
+                for (int i = 0; i < currentNode.children.Length; i++)
                 {
-                    q.Enqueue(item);
+                    var child = currentNode.children[i];
+
+                    //Small optimization, prune children which don't collide.
+                    if (!Physics.CheckBox(child.bounds.center, child.bounds.size / 2, Quaternion.identity))
+                    {
+                        currentNode.children[i] = null;
+                    }
+
+                    //Otherwise, continue BFS on the child.
+                    q.Enqueue(child);
                 }
+
             }
         }
     }
 
 
-    public int GetCount()
+    public uint GetCount()
     {
         return this.numNodes;
     }
 
-    public GraphicsBuffer ToGraphicsBuffer()
+    public Texture3D GetTexture3D()
     {
-        int size = Marshal.SizeOf(new OctreeNodeStruct(parent));//pass in parent because if the int[8] (dynamic size)
+        //Depth: 1 per node. (numnodes
+        //Width: 8 for each node element.
+        //Height:1
+        //Creating texture with proper size
+        //Pray that the texture format is good enough for indexing.
+        Texture3D texture3d = new Texture3D(1, 8, (int)numNodes, TextureFormat.RGB565, false) ;
+        texture3d.wrapMode = TextureWrapMode.Clamp;
+        texture3d.filterMode = FilterMode.Point;   
+        texture3d.anisoLevel = 0;
+
+        OctreeNodeStruct[] nodes = this.ToStructArray();
+
+        foreach (var node in nodes)
+        {
+            int[] octants = node.GetOctants();
+
+            for (int i = 0; i < octants.Length; i++)
+            {
+                texture3d.SetPixel(
+                    //The parent is at depth node.id
+                    0, i, node.id,
+                    //The pointer to the octant is at this DEPTH! Admittedly there is some wasted space here.
+                    new Color(0, 0, octants[i])
+                    );
+            }
+        }
+        return texture3d;
+
+
+    }
+
+    public OctreeNodeStruct[] ToStructArray()
+    {
         OctreeNodeStruct[] nodes = new OctreeNodeStruct[numNodes];
 
         //Get all of the nodes via BFS.
@@ -183,42 +232,20 @@ public class Octree : MonoBehaviour
             }
         }
 
+        return nodes;
+    }
 
-        GraphicsBuffer octree = new GraphicsBuffer(GraphicsBuffer.Target.Structured, numNodes, size);
+    public GraphicsBuffer GetGraphicsBuffer()
+    {
+        int size = Marshal.SizeOf(new OctreeNodeStruct(parent));//pass in parent because if the int[8] (dynamic size)
 
-        octree.SetData(nodes);
+        GraphicsBuffer octree = new GraphicsBuffer(GraphicsBuffer.Target.Structured, (int)numNodes, size);
+
+        octree.SetData(this.ToStructArray());
         return octree;
     }
 
 }
-
-
-
-
-    ////Not very performant because of rather large stack.
-    //private void h_Insert<T>(OctreeNode parent, T inserted, Func<OctreeNode, T, bool> contains, int depth)
-    //{
-    //    if (depth <= 0 ||  parent.bounds.size.magnitude < maxSize)
-    //    {
-    //        return;
-    //    }
-
-    //    //Construct the children if they don't exist
-    //    if(parent.children == null)
-    //    {
-    //        parent.ConstructChildren();
-    //    }
-
-    //    //TODO: Can this be optimized for tail recursion? Yes in theory but no because apparently C# doesn't support it.
-    //    foreach (var child in parent.children)
-    //    {
-    //        if (contains(child, inserted))
-    //        {
-    //            //Recurse.
-    //            h_Insert(child, inserted, contains ,depth-1);
-    //        }
-    //    }
-    //}
 
 
 [CustomEditor(typeof(Octree))]
@@ -270,8 +297,10 @@ class OctreeEditor : Editor
 
         else
         {
+
             for (int i = 0; i < parent.children.Length; i++)
             {
+                if (parent.children[i] == null) continue;
                 DrawOctreeRecursive(parent.children[i], maxDepth-1);
             }
         }
@@ -286,8 +315,14 @@ class OctreeEditor : Editor
 
         if (GUILayout.Button("TryGenerateBuffer"))
         {
-            octree.ToGraphicsBuffer();
+            octree.GetGraphicsBuffer();
         }
+
+        if (GUILayout.Button("TryGenerateTexture3D"))
+        {
+            octree.GetTexture3D();
+        }
+
     }
 
 }

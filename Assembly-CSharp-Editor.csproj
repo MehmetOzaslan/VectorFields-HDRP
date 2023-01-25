@@ -735,9 +735,6 @@
     <Reference Include="UnityEditor.TestRunner">
       <HintPath>Library\ScriptAssemblies\UnityEditor.TestRunner.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.VisualEffectGraph.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.VisualEffectGraph.Editor.dll</HintPath>
-    </Reference>
     <Reference Include="Unity.VSCode.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.VSCode.Editor.dll</HintPath>
     </Reference>
@@ -755,9 +752,6 @@
     </Reference>
     <Reference Include="Unity.VisualStudio.Editor">
       <HintPath>Library\ScriptAssemblies\Unity.VisualStudio.Editor.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.VisualEffectGraph.Runtime">
-      <HintPath>Library\ScriptAssemblies\Unity.VisualEffectGraph.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Timeline">
       <HintPath>Library\ScriptAssemblies\Unity.Timeline.dll</HintPath>
@@ -830,6 +824,22 @@
     <ProjectReference Include="Assembly-CSharp.csproj">
       <Project>{D5F237CD-DA3A-706F-9E9F-6F1F1CB4B52C}</Project>
       <Name>Assembly-CSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="Unity.VisualEffectGraph.Editor.csproj">
+      <Project>{909EBEB6-29B8-4D8E-3EDC-54AA12460B2D}</Project>
+      <Name>Unity.VisualEffectGraph.Editor</Name>
+    </ProjectReference>
+    <ProjectReference Include="Unity.VisualEffectGraph.Runtime.csproj">
+      <Project>{5D439628-A3EE-B585-85F7-D622665D1271}</Project>
+      <Name>Unity.VisualEffectGraph.Runtime</Name>
+    </ProjectReference>
+    <ProjectReference Include="VisualEffectGraphExtras.Runtime.csproj">
+      <Project>{9278053B-A3AC-48F5-9B31-CF94D67E7E2E}</Project>
+      <Name>VisualEffectGraphExtras.Runtime</Name>
+    </ProjectReference>
+    <ProjectReference Include="VisualEffectGraphExtras.Editor.csproj">
+      <Project>{476E727D-B262-E719-53AE-79CEEB887DCB}</Project>
+      <Name>VisualEffectGraphExtras.Editor</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
