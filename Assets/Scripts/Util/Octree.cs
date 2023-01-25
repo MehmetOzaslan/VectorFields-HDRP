@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEditor;
+using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -37,100 +38,121 @@ public class OctreeNode
 [ExecuteInEditMode]
 public class Octree : MonoBehaviour
 {
-
-    public int MaxDepth = 5;
+    int MaxDepth = 5;
+    public float maxSize = 0.3f;
     public OctreeNode parent;
     public List<GameObject> surrounding;
 
-
-
     public void Start()
     {
-        Reconstruct();
+        GenerateOctree();
     }
 
-    public void Reconstruct()
+    private void Update()
     {
-        parent = new OctreeNode(new Bounds(transform.position, Vector3.one));
+        GenerateOctree();
+    }
 
-        foreach (var item in surrounding)
+    //Attempt to reduce stack space by using a queue.
+    private void GenerateOctree()
+    {
+        if(this.parent== null)
         {
-            parent.bounds.Encapsulate(item.GetComponent<Collider>().bounds);
+            parent = new OctreeNode(new Bounds(transform.position, Vector3.one * 5));
         }
 
-        foreach (var item in surrounding)
+
+        Queue<OctreeNode> q = new Queue<OctreeNode>();
+
+        q.Enqueue(parent);
+
+        while(q.Count > 0)
         {
-            InsertObject(item);
-        }
+            var currentNode = q.Dequeue();
 
-    }
-
-    public void InsertObject(GameObject obj)
-    {
-        if (obj.GetComponent<Collider>())
-        {
-
-            Insert<Bounds>(new Bounds(), (node, bounds) => { return BoundsIntersecting(node.bounds); });
-        }
-    }
-
-    bool BoundsIntersecting(Bounds bounds)
-    {
-        return Physics.CheckBox(bounds.center, bounds.size/2, Quaternion.identity);
-    }
-
-    public void InsertPoint(Vector3 point) {
-        Insert(point, (node, point) => { return node.bounds.Contains(point); });
-    }
-
-    //Insert a point.
-    public void Insert<T>(T inserted, Func<OctreeNode, T, bool> contains)
-    {
-        h_Insert(parent, inserted, contains, MaxDepth);
-    }
-
-    private void h_Insert<T>(OctreeNode parent, T inserted, Func<OctreeNode, T, bool> contains, int depth)
-    {
-        Debug.Log(depth);
-        if (depth == 0)
-        {
-            return;
-        }
-
-        //Construct the children if they don't exist
-        if(parent.children == null)
-        {
-            parent.ConstructChildren();
-        }
-
-        //Optimize potentially
-        foreach (var child in parent.children)
-        {
-            if (contains(child, inserted))
+            //Base case.
+            if(currentNode.bounds.size.sqrMagnitude < maxSize) 
             {
-                //Recurse.
-                h_Insert(child, inserted, contains ,depth-1);
+                continue;
+            }
+            else if(Physics.CheckBox(currentNode.bounds.center, currentNode.bounds.size / 2, Quaternion.identity))
+            {
+                currentNode.ConstructChildren();
+                foreach (var item in currentNode.children)
+                {
+                    q.Enqueue(item);
+                }
             }
         }
-    }
+
+     }
+
+    ////Not very performant because of rather large stack.
+    //private void h_Insert<T>(OctreeNode parent, T inserted, Func<OctreeNode, T, bool> contains, int depth)
+    //{
+    //    if (depth <= 0 ||  parent.bounds.size.magnitude < maxSize)
+    //    {
+    //        return;
+    //    }
+
+    //    //Construct the children if they don't exist
+    //    if(parent.children == null)
+    //    {
+    //        parent.ConstructChildren();
+    //    }
+
+    //    //TODO: Can this be optimized for tail recursion? Yes in theory but no because apparently C# doesn't support it.
+    //    foreach (var child in parent.children)
+    //    {
+    //        if (contains(child, inserted))
+    //        {
+    //            //Recurse.
+    //            h_Insert(child, inserted, contains ,depth-1);
+    //        }
+    //    }
+    //}
 }
 
 [CustomEditor(typeof(Octree))]
 class OctreeEditor : Editor
 {
 
+    private BoxBoundsHandle boundsHandle = new BoxBoundsHandle();
+
     private void OnSceneGUI()
     {
         Octree octree = (Octree)target;
+
+        // copy the target object's data to the handle
+        boundsHandle.center = octree.parent.bounds.center;
+        boundsHandle.size = octree.parent.bounds.size;
+
+        EditorGUI.BeginChangeCheck();
         DrawOctreeRecursive(octree.parent);
+        boundsHandle.DrawHandle();
+        if (EditorGUI.EndChangeCheck())
+        {
+            // record the target object before setting new values so changes can be undone/redone
+            Undo.RecordObject(octree, "Change Bounds");
+
+            // copy the handle's updated data back to the target object
+            Bounds newBounds = new Bounds();
+            newBounds.center = boundsHandle.center;
+            newBounds.size = boundsHandle.size;
+            octree.parent.bounds = newBounds;
+        }
+
+
     }
 
-
-    private void DrawOctreeRecursive(OctreeNode parent)
+    private void DrawOctreeRecursive(OctreeNode parent, int maxDepth = 5)
     {
+
+
+
         Handles.DrawWireCube(parent.bounds.center, (parent.bounds.size));
 
-        if (parent.children == null)
+        if (parent.children == null || maxDepth == 0)
         {
             return;
         }
@@ -139,7 +161,7 @@ class OctreeEditor : Editor
         {
             for (int i = 0; i < parent.children.Length; i++)
             {
-                DrawOctreeRecursive(parent.children[i]);
+                DrawOctreeRecursive(parent.children[i], maxDepth-1);
             }
         }
 
@@ -149,13 +171,6 @@ class OctreeEditor : Editor
     public override void OnInspectorGUI()
     {
         base.OnInspectorGUI();
-
-
-        if (GUILayout.Button("Reconstruct"))
-        {
-
-            ((Octree)target).Reconstruct();
-        }
 
     }
 
