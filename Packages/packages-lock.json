@@ -163,13 +163,14 @@
       }
     },
     "net.peeweek.vfxgraph-extras": {
-      "version": "file:C:/Users/mytur/Downloads/net.peeweek.vfxgraph-extras-2021.3.0/net.peeweek.vfxgraph-extras-2021.3.0",
+      "version": "2021.3.2",
       "depth": 0,
-      "source": "local",
+      "source": "registry",
       "dependencies": {
         "com.unity.visualeffectgraph": "12.1.0",
         "com.unity.shadergraph": "12.1.0"
-      }
+      },
+      "url": "https://package.openupm.com"
     },
     "com.unity.modules.ai": {
       "version": "1.0.0",

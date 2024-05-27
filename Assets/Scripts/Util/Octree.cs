@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEditor;
-using UnityEditor.Experimental.GraphView;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using UnityEngine.VFX;
@@ -13,6 +12,48 @@ using UnityEngine.VFX;
 //For writing to structured buffer
 //NOTES:
 //LET 0 BE A NULL POINTER.
+
+namespace OctreeV2 { 
+    
+    
+    public struct OctreeNode
+    {
+        public int childIdx;
+        public int dataCount;
+
+        public OctreeNode(int childIdx, int dataCount)
+        {
+            this.childIdx = childIdx;
+            this.dataCount = dataCount;
+        }
+    }
+
+    public class Octree
+    {
+        public const int NUM_CHILDREN = 8;
+        public int NUM_LEAF = 5;
+
+        public Bounds parentSize;
+        List<OctreeNode> octree;
+        int maxDepth = 4;
+        float minSize = 0.4f;
+
+        void AddChildren(OctreeNode node)
+        {
+            int childIdx = octree.Count;
+            for (int i = 0; i < NUM_CHILDREN; i++)
+            {
+                octree.Add(new OctreeNode(childIdx + i, 0));
+            }
+        }
+
+
+        void AddPoint()
+        {
+
+        }
+    }
+}
 
 
 [VFXType(VFXTypeAttribute.Usage.GraphicsBuffer)]
@@ -134,7 +175,6 @@ public class Octree : MonoBehaviour
 
         while(q.Count > 0)
         {
-
             var currentNode = q.Dequeue();
             currentNode.id = curr_id;
             curr_id++;
@@ -300,7 +340,9 @@ class OctreeEditor : Editor
 
             for (int i = 0; i < parent.children.Length; i++)
             {
-                if (parent.children[i] == null) continue;
+                if (parent.children[i] == null) {
+                    continue;
+                }
                 DrawOctreeRecursive(parent.children[i], maxDepth-1);
             }
         }
